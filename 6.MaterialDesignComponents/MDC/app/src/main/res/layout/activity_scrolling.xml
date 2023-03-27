@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".ScrollingActivity">
+
+    <include
+        android:id="@+id/content"
+        layout="@layout/content_scrolling" />
+
+    <!-- ============== BottomAppBar ================================
+        Es una barra de acciones en la parte inferior de la pantalla\
+        Esta pensada para las aplicaciones en las que se hace un scroll
+        y se quiere ofrecer un menu o acciones de forma accesible al usuario
+            PROPIEDADES:
+        navigationIcon: Se especifica la imagen que tendra el boton de navegacion,
+                        el qu esta a la izquierda en este caso
+        menu: Para especificar el compoenente que se utilizara como menu y con
+              esto aparece un icono de tres puntos el que esta a la derecha
+        hideOnScroll: Si se especifica en true, el bottomAppBar se ocultara al hacer scroll
+        fabAnimationMode: Es el tipo de animacion que tendra el FloatingActionButton relacionado al BottomAppBar al desplazarse
+        style: Se tiene estilos predefinidos en la librerias para elementos especificos
+
+
+    -->
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottom_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:navigationIcon="@drawable/ic_menu"
+        app:menu="@menu/menu_scrolling"
+        app:hideOnScroll="true"
+        app:fabAnimationMode="scale"
+        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"/>
+
+    <!-- ==================== FloatingActionButton ============================
+        Este es un boton flotante que se mantiene por encima de todos los demas
+        elementos del layout
+            PROPIEDADES:
+        src: Se especifica el icono que tendra el boton
+        layout_anchor: Se especifica el id del elemento sobre el que se debe posicionar el boton
+                       En caso de interactuar con otro materialDesign se producira un mejor efecto
+        contentDescription: Se especifica para una mejor accesibilidad y sera una descripcion
+                            de lo que hace el boton
+    -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add_task"
+        android:contentDescription="@string/add_task"
+        app:layout_anchor="@id/bottom_app_bar"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

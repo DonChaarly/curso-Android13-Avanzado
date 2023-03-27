@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ================= NestedScrollView ======================
+    Este compoente es igual a un ScrollView normal pero esta optimizado para trabajar con los MDC
+ -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".ScrollingActivity"
+    tools:showIn="@layout/activity_scrolling">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:orientation="vertical">
+
+        <!--================================ MaterialCardView =================
+            Los MaterialCardView son otro tipo de contenedor pero especializado en
+            mostrar informacion en areas mas pequenas a modo de tarjeta
+            Dentro se tiene que especificar otro tipo de contenedor para organizar los elementos
+                PROPIEDADES:
+            clickable: para permitir que se pueda hacer click sobre y se de efecto de click
+            focusable: para permitir que se de focus a este elemento, va de la mano con clickable
+            cardElevation: Sera la elevacion que tendra la tarjeta, y se notaran con sombras al rededor
+        -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvAd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/common_padding_min"
+            android:layout_marginStart="@dimen/common_padding_min"
+            android:layout_marginEnd="@dimen/common_padding_min"
+                android:visibility="visible"
+            app:cardElevation="@dimen/common_padding_min"
+            android:clickable="true"
+            android:focusable="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/common_padding_default"
+                android:paddingStart="@dimen/common_padding_default"
+                android:paddingEnd="@dimen/common_padding_default">
+
+                <ImageView
+                    android:id="@+id/imgCard"
+                    android:layout_width="@dimen/card_img_size"
+                    android:layout_height="@dimen/card_img_size"
+                    android:src="@mipmap/ic_launcher"
+                    android:importantForAccessibility="no"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- ================ MaterialButton ======================
+                    Los MaterialButton son igual que los botones pero mas apegados a los lineamientos de google
+                        PROPIEDADES:
+                    text: Sera el texto que se vera en el boton
+                    icon: Se puede especificar un icono aparte del texto en el boton
+                -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBuy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_btn_buy"
+                    android:layout_marginTop="@dimen/common_padding_min"
+                    app:icon="@drawable/ic_shop"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/imgCard"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSkip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_btn_skip"
+                    app:layout_constraintEnd_toStartOf="@id/btnBuy"
+                    app:layout_constraintTop_toTopOf="@id/btnBuy"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+                <!-- =================== UI Para TextView ==========================
+                    Con las siguientes propiedades se les puede dar una apariencia mas acorde a los estandares de google
+                        PROPIEDADES:
+                    textApparence: con la libreria ?attr/ se puede seleccionar apariencias predefinidas
+                    maxLines: Para indicar el maximo de lineas que seran visibles
+                    ellipsize: para mostrar puntos suspensivos e indicar que el texto sigue
+                -->
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_title"
+                    android:textAppearance="?attr/textAppearanceHeadline5"
+                    android:layout_marginStart="@dimen/common_padding_default"
+                    app:layout_constraintStart_toEndOf="@id/imgCard"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="@string/large_text"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    android:maxLines="3"
+                    android:ellipsize="end"
+                    app:layout_constraintStart_toStartOf="@id/tvTitle"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitle"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitle"
+                    app:layout_constraintBottom_toBottomOf="@id/imgCard"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:layout_marginTop="@dimen/common_padding_min"
+            android:layout_marginStart="@dimen/common_padding_min"
+            android:layout_marginEnd="@dimen/common_padding_min">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- ================= ImageView ========================
+                Este elemento se utiliza para mostrar una imagen
+                    PROPIEDADES:
+                src: se indica la imagen que se mostrara
+                -->
+                <ImageView
+                    android:id="@+id/imgCover"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/card_img_cover_height"
+                    android:importantForAccessibility="no"
+                    android:background="@color/design_default_color_secondary"
+                    android:visibility="visible"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tvTitleAlt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_title"
+                    android:textAppearance="?attr/textAppearanceHeadline5"
+                    android:layout_margin="@dimen/common_padding_default"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/imgCover"/>
+
+                <!-- ===================== TextInputLayout =========================
+                    Este es un contenedor que se utiliza para los TextInputEditText, y nos ofrece muchas mejoras para el usuario
+                    como que el placeHolder o hint al escribir algo no desaparezca sino se vaya a la parte de arriba con una animacino
+                    o poder colocar alguna instruccion debajo del input como una instruccion
+                    Tambien poder especificar un icono al final del input como un ojo para mostar la contrasena
+                        PROPIEDADES:
+                    hint: Se especifica un texto descriptivo cuando el campo input esta vacio
+                    helperText: Se especifica alguna instruccion al usuario
+                    endIconMode: Es un icono que estara al final del input como un ojo para mostrar la contrasena
+                    style: Se puede utilizar un estilo predefinido de la libreria style
+                    enabled: Se utiliza par habilitar o deshabilitar el input
+                -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilUrl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/card_input_url"
+                    android:layout_marginTop="@dimen/common_padding_default"
+                    app:helperText="@string/card_required"
+                    app:endIconMode="clear_text"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleAlt"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+
+                    <!-- ===================== TextInputLayout =========================
+                        Este elementos es muy similar a un EditText, sin embargo tiene
+                        mejoras para ofrecer una mejor experiencia al usuario
+                            PROPIEDADES:
+                        inputType: Se utiliza par especificar el tipo de dato que se ingresara y que verifique que sea correcto
+                    -->
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etUrl"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textUri"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPassword"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/card_password"
+                    android:layout_marginTop="@dimen/common_padding_default"
+                    android:enabled="false"
+                    app:endIconMode="password_toggle"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/tilUrl"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- ================== MaterialCheckBox =========================
+                    Este elemento es un checkBox mejorado, se utiliza para marcar opciones o desmarcarlas
+                        PROPIEDADES:
+                    text: Se especifica el texto que tendra el checkbox
+                -->
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/cbEnablePass"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_enable_pass"
+                    android:layout_marginTop="@dimen/common_padding_default"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/tilPassword"/>
+
+                <!-- =================== SwitchMaterial =========================
+                    El SwitchMaterial es un elemento booleano que manda true o false si el usuario lo oprime
+                    Es como un tipo de CheckBox
+                        PROPIEDADES:
+                    checked: Para definir el estado inicial del switch
+                    text: Texto que mostrar el switch
+
+                -->
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/swFab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_hide_fab"
+                    android:checked="true"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toTopOf="@id/cbEnablePass"
+                    app:layout_constraintBottom_toBottomOf="@id/cbEnablePass"/>
+
+                <!-- ========================= Slider ============================
+                    El Slider es una herramienta que nos ayuda a representar rangos
+                    como un rango de volumen
+                        PROPIEDADES:
+                    valueFrom: Valor de inicio de rango
+                    valueTo: Valor de final de rango
+                    value: Valor inicial por defecto
+                    stepSize: Incremento o decremento al aumentar o decrementar el valor del slider
+                -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sldVol"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.0"
+                    android:valueTo="10.0"
+                    android:value="6.0"
+                    android:stepSize="2.0"
+                    app:layout_constraintTop_toBottomOf="@id/cbEnablePass"/>
+
+                <!-- ========================== Chip ================================
+                    Los Chip nos sirven para representar opciones que se pueden eliminar debido a su boton x
+                    se utilizan para por ejemplo representar gustos
+                    Al hacer click sobre ellos, aparece un icono de que fue seleccionado
+                    text: Texto que tendra el chip
+                    closeIconEnabled: Para indicar que se musetre el icono de cierre
+
+
+                -->
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/cpEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ant@frogames.es"
+                    android:checkable="true"
+                    app:closeIconEnabled="true"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/sldVol"/>
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/common_padding_middle"
+                    android:background="@color/color_divider"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/cpEmail"/>
+
+                <TextView
+                    android:id="@+id/tvSubtitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_title"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:layout_marginTop="@dimen/common_padding_middle"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/divider"/>
+
+                <TextView
+                    android:id="@+id/tvMessageAlt"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/large_text"
+                    android:textAppearance="?attr/textAppearanceBody1"
+                    android:maxLines="5"
+                    android:ellipsize="end"
+                    android:layout_marginTop="@dimen/common_padding_default"
+                    app:layout_constraintStart_toStartOf="@id/tvTitleAlt"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/tvSubtitle"/>
+
+                <!-- ================= MaterialButtonToggleGroup ============================
+                    Este elemento se utiliza para agrupar botones como opciones
+                    Este elemento tomara control sobre los botones que tenga dentro
+                        PROPIEDADES:
+                    singleSelection: Para especificar que solo se podra seleccionar un boton a la vez
+                -->
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toogle_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/common_padding_default"
+                    app:singleSelection="true"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvMessageAlt">
+
+                    <Button
+                        android:id="@+id/btnRed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/card_toogle_red"
+                        style="?attr/materialButtonOutlinedStyle"/>
+
+                    <Button
+                        android:id="@+id/btnBlue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/card_toogle_blue"
+                        style="?attr/materialButtonOutlinedStyle"/>
+
+                    <Button
+                        android:id="@+id/btnGreen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/card_toogle_green"
+                        style="?attr/materialButtonOutlinedStyle"/>
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_btn_skip"
+                    android:layout_marginTop="@dimen/common_padding_middle"
+                    android:layout_marginBottom="@dimen/common_padding_min"
+                    app:layout_constraintEnd_toEndOf="@id/tvTitleAlt"
+                    app:layout_constraintTop_toBottomOf="@id/toogle_button"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="180dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/card_title_secondary"
+                android:layout_margin="@dimen/common_padding_default"
+                android:textAppearance="?attr/textAppearanceHeadline5"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_email"
+                android:layout_marginTop="64dp"
+                android:layout_marginHorizontal="@dimen/common_padding_default"
+                app:endIconMode="clear_text"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/card_btn_skip"
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="@dimen/common_padding_min"
+                android:layout_marginBottom="@dimen/common_padding_min"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
