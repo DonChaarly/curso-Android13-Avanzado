@@ -61,13 +61,79 @@ class EditStoreFragment : Fragment() {
         setupTextFields()
     }
 
+    /*============================ ACTION BAR EN FRAGMENT ======================================*/
     private fun setupActionBar() {
+        /*
+        * Se puede conseguir la activity en la que se esta alojando este fragmento de la siguiente forma
+        * Esto se puede hacer a partir de onViewCreated()
+        * */
         mActivity = activity as? MainActivity
+        /*Para mostrar una flecha de retroceso en el ActionBar*/
         mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         mActivity?.supportActionBar?.title = if (mIsEditMode) getString(R.string.edit_store_title_edit)
         else getString(R.string.edit_store_title_add)
 
+        /*=========================== MENUS EN FRAGMENTS =======================================*/
+        /* Para agregar un menu al fragmento es necesario colocar el siguiente metodo en true*/
         setHasOptionsMenu(true)
+    }
+
+    /* Para los menus hay que sobreescribir los metodos:
+    * onCreateOptionsMenu(): Se utiliza para establecer el menu que se utilizara
+    * onOptionsItemSelected(): Se utiliza para establecer los metodos que se ejecutaran al oprimir los botones del menu
+    * */
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        /* Establecemos el layout de menu que utilizaremos*/
+        inflater.inflate(R.menu.menu_save, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            android.R.id.home -> {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+                true
+            }
+            R.id.action_save -> {
+                if (mStoreEntity != null &&
+                    validateFields(mBinding.tilPhotoUrl, mBinding.tilPhone, mBinding.tilName)){
+                    with(mStoreEntity!!) {
+                        name = mBinding.etName.text.toString().trim()
+                        phone = mBinding.etPhone.text.toString().trim()
+                        website = mBinding.etWebsite.text.toString().trim()
+                        photoUrl = mBinding.etPhotoUrl.text.toString().trim()
+                    }
+
+                    val queue = LinkedBlockingQueue<StoreEntity>()
+                    Thread {
+                        if (mIsEditMode) StoreApplication.database.storeDao().updateStore(mStoreEntity!!)
+                        else mStoreEntity!!.id = StoreApplication.database.storeDao().addStore(mStoreEntity!!)
+                        queue.add(mStoreEntity)
+                    }.start()
+
+                    with(queue.take()) {
+                        hideKeyboard()
+
+                        if (mIsEditMode){
+                            mActivity?.updateStore(this)
+
+                            Snackbar.make(mBinding.root,
+                                R.string.edit_store_message_update_success,
+                                Snackbar.LENGTH_SHORT).show()
+                        } else {
+                            mActivity?.addStore(this)
+
+                            Toast.makeText(mActivity, R.string.edit_store_message_save_success, Toast.LENGTH_SHORT).show()
+
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        }
+                    }
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun setupTextFields() {
@@ -128,57 +194,6 @@ class EditStoreFragment : Fragment() {
         })
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_save, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            android.R.id.home -> {
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-                true
-            }
-            R.id.action_save -> {
-                if (mStoreEntity != null &&
-                    validateFields(mBinding.tilPhotoUrl, mBinding.tilPhone, mBinding.tilName)){
-                    with(mStoreEntity!!) {
-                        name = mBinding.etName.text.toString().trim()
-                        phone = mBinding.etPhone.text.toString().trim()
-                        website = mBinding.etWebsite.text.toString().trim()
-                        photoUrl = mBinding.etPhotoUrl.text.toString().trim()
-                    }
-
-                    val queue = LinkedBlockingQueue<StoreEntity>()
-                    Thread {
-                        if (mIsEditMode) StoreApplication.database.storeDao().updateStore(mStoreEntity!!)
-                        else mStoreEntity!!.id = StoreApplication.database.storeDao().addStore(mStoreEntity!!)
-                        queue.add(mStoreEntity)
-                    }.start()
-
-                    with(queue.take()) {
-                        hideKeyboard()
-
-                        if (mIsEditMode){
-                            mActivity?.updateStore(this)
-
-                            Snackbar.make(mBinding.root,
-                                R.string.edit_store_message_update_success,
-                                Snackbar.LENGTH_SHORT).show()
-                        } else {
-                            mActivity?.addStore(this)
-
-                            Toast.makeText(mActivity, R.string.edit_store_message_save_success, Toast.LENGTH_SHORT).show()
-
-                            requireActivity().onBackPressedDispatcher.onBackPressed()
-                        }
-                    }
-                }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 
     private fun validateFields(vararg textFields: TextInputLayout): Boolean{
         var isValid = true
@@ -231,6 +246,7 @@ class EditStoreFragment : Fragment() {
         super.onDestroyView()
     }
 
+    /*Se puede utilizar el metodo onDestroy para quitar configuraciones del ActionBar o cosas que ocultamos al mostrar el fragment*/
     override fun onDestroy() {
         mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
         mActivity?.supportActionBar?.title = getString(R.string.app_name)

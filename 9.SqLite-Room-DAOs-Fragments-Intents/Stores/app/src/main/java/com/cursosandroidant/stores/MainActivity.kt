@@ -41,15 +41,29 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         setupRecyclerView()
     }
 
+    /* =============== LANZAMIENTO DE FRAGMENT =================================
+    * Se puede crear un metodo que se encargue de lanzar nuestro fragment,\
+    * esta funcion la podremos mandar a llamar desde donde lo queramos
+    * */
     private fun launchEditFragment(args: Bundle? = null) {
+        /*Se crea una instancia de nuestro fragmento*/
         val fragment = EditStoreFragment()
         if (args != null) fragment.arguments = args
 
+        /*FragmentManger: Es el gestor de android para controlar los fragmentos*/
         val fragmentManager = supportFragmentManager
+        /*FragmentTransaction: Es el que va a decidir como se va a ejecutar*/
         val fragmentTransaction = fragmentManager.beginTransaction()
 
+        /*Se especifica el contenedor en donde se cargara el fragmento,
+        * Esto enviara al frente de nuestro layout el fragmento, hay que colocarle un color
+        * de backgroun si queremos que el fondo no se vea transparente
+        * */
         fragmentTransaction.add(R.id.containerMain, fragment)
+        /*La funcion addToBackStack se utiliza para que cuando se haga un retroceso o back, no se
+        cierre la aplicacion o se vaya a la pagina anterior sino que se cierre el fragment*/
         fragmentTransaction.addToBackStack(null)
+        /*Se utiliza la funcion commit() para que se apliquen los cambios*/
         fragmentTransaction.commit()
 
         hideFab()

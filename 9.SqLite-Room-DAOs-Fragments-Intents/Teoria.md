@@ -284,7 +284,100 @@ El layout puede ser como se quiera con el layout que queramos,
 </androidx.core.widget.NestedScrollView>
 ```
 
-### Lanzar un fragment desde la mainActivity
+## Funciones utilies de los fragments
+
+En la clase del Fragment se pueden utilizar los siguientes metodos
+
+### Activity en donde se aloja el fragment
+Se puede conseguir la activity en la que se esta alojando este fragmento de la siguiente forma
+Esto se puede hacer a partir de onViewCreated()
+```kotlin
+mActivity = activity as? MainActivity
+```
+
+### ActionBar en Fragment
+Para mostrar una flecha de retroceso en el ActionBar
+```kotlin
+mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+```
+Para Agregar un titulo al ActionBar
+```kotlin
+mActivity?.supportActionBar?.title = if (mIsEditMode) getString(R.string.edit_store_title_edit)
+```
+Para quitar el boton de retroceso
+```kotlin
+mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+```
+
+### Menus en Framents
+Para crear un menu se hace lo siguiente\
+![](/9.SqLite-Room-DAOs-Fragments-Intents/Imagenes/CreacionMenu.png)
+![](/9.SqLite-Room-DAOs-Fragments-Intents/Imagenes/NombramientoMenu.png)
+
+Este sera el esqueleto basico de un menu:\
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_save"
+        android:title="@string/menu_save"
+        android:icon="@drawable/ic_check"
+        app:showAsAction="ifRoom"/>
+
+</menu>
+```
+
+Se coloca el siguiente metodo dentro de onViewCreated o algun metodo:\
+```kotlin
+setHasOptionsMenu(true)
+```
+
+Se sobreescriben los siguientes metodos:
+  * onCreateOptionsMenu(): Se utiliza para establecer el menu que se utilizara
+  * onOptionsItemSelected(): Se utiliza para establecer los metodos que se ejecutaran al oprimir los botones del menu
+
+```kotlin
+
+override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    /* Establecemos el layout de menu que utilizaremos*/
+    inflater.inflate(R.menu.menu_save, menu)
+    super.onCreateOptionsMenu(menu, inflater)
+}
+
+
+override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    /*Con un when se puede ejecutar una accion dependiendo del id del item o boton oprimido*/
+    return when(item.itemId){
+        android.R.id.home -> {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+            true
+        }
+        R.id.action_save -> {
+            ...
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
+    }
+}
+```
+
+### Metodo onDestroy
+
+Se puede utilizar el metodo onDestroy para quitar configuraciones del ActionBar o cosas que ocultamos al mostrar el fragment
+```kotlin
+override fun onDestroy() {
+    mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+    mActivity?.supportActionBar?.title = getString(R.string.app_name)
+    mActivity?.hideFab(true)
+
+    setHasOptionsMenu(false)
+    super.onDestroy()
+}
+```
+
+## Lanzar un fragment desde la mainActivity
 
 Se puede crear un metodo que se encargue de lanzar nuestro fragment,\
 esta funcion la podremos mandar a llamar desde donde lo queramos

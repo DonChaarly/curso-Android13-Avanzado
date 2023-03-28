@@ -135,3 +135,12 @@ Para establecer un mensaje de error a algun input
 ### .setBackgroundColor
 Para establecer el color de fondo del elemento
 
+
+## Ocultar keyboard
+
+```kotlin
+private fun hideKeyboard(){
+    val imm = mActivity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+}
+```
