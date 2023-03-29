@@ -28,11 +28,12 @@ class StoreApplication : Application() {
         super.onCreate()
 
         val MIGRATION_1_2 = object : Migration(1, 2){
+            /*Dentro de este metodo que sobreescribimos la consulta con la que se alterara la tabla de la base de datos*/
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE StoreEntity ADD COLUMN photoUrl TEXT NOT NULL DEFAULT ''")
             }
         }
-
+        /*Se manda llamar el metodo addMigration() para indicar la migracion que se hara*/
         database = Room.databaseBuilder(this,
             StoreDatabase::class.java,
             "StoreDatabase")

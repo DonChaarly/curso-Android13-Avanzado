@@ -161,4 +161,22 @@ dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
 }
 ```
 
+Para establecer varias opciones como un tipo menu:
+```kotlin
+val items = resources.getStringArray(R.array.array_options_item)
+
+MaterialAlertDialogBuilder(this)
+    .setTitle(R.string.dialog_options_title)
+    .setItems(items) { _, i ->
+        when(i){
+            0 -> confirmDelete(storeEntity)
+
+            1 -> dial(storeEntity.phone)
+
+            2 -> goToWebsite(storeEntity.website)
+        }
+    }
+    .show()
+```
+
 

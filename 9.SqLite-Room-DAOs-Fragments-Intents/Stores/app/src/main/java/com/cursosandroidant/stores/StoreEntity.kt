@@ -18,6 +18,11 @@ data class StoreEntity(@PrimaryKey(autoGenerate = true) var id: Long = 0,
                        var photoUrl: String = "",
                        var isFavorite: Boolean = false){
 
+    /*==================== METODOS EQUALS Y HASHCODE ======================
+    * La libreria de Room nos crea automaticamente nuestros metodo equals y hashCode que se utilizan para verificar que dos objetos son iguales\
+    * Sin embargo estos metodos pueden llegar a fallar o no funcionar como nosotros queremos\
+    * Para esto se puede sobreescribir estos metodos y establecer una nueva forma de verificar dos objetos iguales\
+    * */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

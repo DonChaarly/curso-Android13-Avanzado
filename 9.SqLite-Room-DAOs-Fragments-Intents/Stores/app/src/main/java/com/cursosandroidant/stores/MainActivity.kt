@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun launchEditFragment(args: Bundle? = null) {
         /*Se crea una instancia de nuestro fragmento*/
         val fragment = EditStoreFragment()
+        /*Se agregan los argumentos con fragment.argumentos y se iguala a los argumentos que se tengan si es que se tienen*/
         if (args != null) fragment.arguments = args
 
         /*FragmentManger: Es el gestor de android para controlar los fragmentos*/
@@ -97,8 +98,11 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         mAdapter.setStores(queue.take())
     }
 
-    /*
-    * OnClickListener
+    /*====================== PASAR ARGUMENTOS A UN FRAMENT ==============================
+    * Para pasar argumentos a un fragment hay que crear una variable Bundle()
+    * A esta, como en las SharedPreferences hay que agregar los argumentos con un esquema de llave valor
+    * Se utilizan los metodos para colocar el tipo de dato que se agrega
+    * Finalmente se lanza el fragment pero mandandole los argumentos
     * */
     override fun onClick(storeId: Long) {
         val args = Bundle()
@@ -149,6 +153,10 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
             .show()
     }
 
+    /*============================ INTENTS ========================================
+    * Los intents nos sirven para mandar llamar activitys, sin embargo no solo funciona con activities que esten en nuestra aplicacion,\
+    * sino que tambien con aquellas de otras aplicaciones, como por ejemplo la aplicacion de contactos o llamadas, etc.
+    * */
     private fun dial(phone: String){
         val callIntent = Intent().apply {
             action = Intent.ACTION_DIAL
@@ -156,6 +164,14 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         }
 
         startIntent(callIntent)
+    }
+
+    /*Se utiliza una intent.resolveActivity(packageManager) para verificar que la aplicacion que se quiere abrir es compatible*/
+    private fun startIntent(intent: Intent){
+        if (intent.resolveActivity(packageManager) != null)
+            startActivity(intent)
+        else
+            Toast.makeText(this, R.string.main_error_no_resolve, Toast.LENGTH_LONG).show()
     }
 
     private fun goToWebsite(website: String){
@@ -169,13 +185,6 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
             startIntent(websiteIntent)
         }
-    }
-
-    private fun startIntent(intent: Intent){
-        if (intent.resolveActivity(packageManager) != null)
-            startActivity(intent)
-        else
-            Toast.makeText(this, R.string.main_error_no_resolve, Toast.LENGTH_LONG).show()
     }
 
     /*

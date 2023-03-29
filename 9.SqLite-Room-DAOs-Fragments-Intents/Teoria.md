@@ -40,8 +40,20 @@ data class StoreEntity(@PrimaryKey(autoGenerate = true) var id: Long = 0,
                        var website: String = "",
                        var photoUrl: String = "",
                        var isFavorite: Boolean = false){
+}
+```
 
-    override fun equals(other: Any?): Boolean {
+La libreria de Room nos crea automaticamente nuestros metodo equals y hashCode que se utilizan para verificar que dos objetos son iguales\
+Sin embargo estos metodos pueden llegar a fallar o no funcionar como nosotros queremos\
+Para esto se puede sobreescribir estos metodos y establecer una nueva forma de verificar dos objetos iguales\
+Se puede utilizar la ayuda del IDE de android como sigue, utilizando solo el id de identificacion del objeto ya que este nunca se debe repetir:
+
+![Creacion de Equal y HashCode](/9.SqLite-Room-DAOs-Fragments-Intents/Imagenes/EqualHasCode.png)
+![Seleccion de variables Equals y HasCode](/9.SqLite-Room-DAOs-Fragments-Intents/Imagenes/VariablesEqualsHascode.png)
+
+Dentro de la data class:
+```kotlin
+override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
@@ -52,9 +64,8 @@ data class StoreEntity(@PrimaryKey(autoGenerate = true) var id: Long = 0,
         return true
     }
 
-    override fun hashCode(): Int {
-        return id.hashCode()
-    }
+override fun hashCode(): Int {
+    return id.hashCode()
 }
 ```
 
@@ -196,6 +207,32 @@ Thread{
 mAdapter.setStores(queue.take())
 ```
 
+## Alterar tablas ya creadas y con datos
+
+Para poder modificar una tabla que ya tiene datos, hay que notificarle al sistema que esto se va a hacer\ 
+para que los datos que tenga esta tabla se puedan adaptar
+
+1. En clase @Entity: Se comienza por modifcar los campos en la clase data marcada con @Entity, que es en realidad nuestra tabla
+2. En clase Database: En la etiqueta @Database se cambia la version, se incrementa en 1 el numero de version que se tenia
+3. En clase Aplication: Dentro de onCreate se crea una nueva constante val que se llamara MIGRATION_...
+   ```kotlin
+   val MIGRATION_1_2 = object : Migration(1, 2){
+        /*Dentro de este metodo que sobreescribimos la consulta con la que se alterara la tabla de la base de datos*/
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE StoreEntity ADD COLUMN photoUrl TEXT NOT NULL DEFAULT ''")
+        }
+    }
+   ```
+4. En clase Aplication: Se manda llamar el metodo addMigration() para indicar la migracion que se hara
+   ```kotlin
+    database = Room.databaseBuilder(this,
+        StoreDatabase::class.java,
+        "StoreDatabase")
+        .addMigrations(MIGRATION_1_2)
+        .build()
+   ```
+        
+
 # Fragments
 
 ## Ciclo de vida de un Fragment
@@ -284,7 +321,7 @@ El layout puede ser como se quiera con el layout que queramos,
 </androidx.core.widget.NestedScrollView>
 ```
 
-## Funciones utilies de los fragments
+## Funciones utilies de los fragments (set aplica dentro de la clase del Fragment)
 
 En la clase del Fragment se pueden utilizar los siguientes metodos
 
@@ -363,6 +400,33 @@ override fun onOptionsItemSelected(item: MenuItem): Boolean {
 }
 ```
 
+### Manejar los onBackPressed (osea cuando se selecciona el boton de retroceso)
+
+Para esto se puede sobreescribir el metodo onAttach del ciclo de vida del Fragment y configurar un listener\
+que este a la escucha de la seleccion del retroceso, esto se hace como sigue\
+Dentro de la funcion HandleOnBackPressed se configura lo que se quiera hacer cuando se oprima el onBack
+```kotlin
+override fun onAttach(context: Context) {
+    super.onAttach(context)
+    requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true){
+        override fun handleOnBackPressed() {
+            MaterialAlertDialogBuilder(requireActivity())
+                .setTitle(R.string.dialog_exit_title)
+                .setMessage(R.string.dialog_exit_message)
+                .setPositiveButton(R.string.dialog_exit_ok){_, _->
+                    /*Es necesario colocar el siguiente if y deshabilitar el inEnabled para no provocar un ciclo infinito al mandar llamar el onBackPressed()*/
+                    if (isEnabled) {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+                .setNegativeButton(R.string.dialog_delete_cancel, null)
+                .show()
+        }
+    })
+}
+```
+
 ### Metodo onDestroy
 
 Se puede utilizar el metodo onDestroy para quitar configuraciones del ActionBar o cosas que ocultamos al mostrar el fragment
@@ -383,6 +447,7 @@ Se puede crear un metodo que se encargue de lanzar nuestro fragment,\
 esta funcion la podremos mandar a llamar desde donde lo queramos
 
 Lo primero Se crea una instancia de nuestro fragmento\
+Se agregan los argumentos con fragment.argumentos y se iguala a los argumentos que se tengan si es que se tienen\
 Se tiene que implementar dos cosas:
 * FragmentManger: Es el gestor de android para controlar los fragmentos
 * FragmentTransaction: Es el que va a decidir como se va a ejecutar
@@ -404,3 +469,84 @@ private fun launchEditFragment(args: Bundle? = null) {
     hideFab()
 }
 ```
+## Pasar argumentos a un fragment
+
+### Pasar los argumentos desde la MainActivity
+
+Para pasar argumentos a un fragment hay que crear una variable Bundle()\
+A esta, como en las SharedPreferences hay que agregar los argumentos con un esquema de llave valor\
+Se utilizan los metodos para colocar el tipo de dato que se agrega\
+Finalmente se lanza el fragment pero mandandole los argumentos\
+```kotlin
+override fun onClick(storeId: Long) {
+    val args = Bundle()
+    args.putLong(getString(R.string.arg_id), storeId)
+
+    launchEditFragment(args)
+}
+```
+
+### Utilizar los argumentos en el fragment
+
+Para acceder a los argumentos que se hayan mandado al fragment se utiliza la variable arguments\
+Se verifica que no sea null con ?\
+Y se procede a utilizar el metodo correspondiente para el tipo de dato\
+A este se le pasa la llave con la que se guardo el argumento y un valor por default\
+```kotlin
+val id = arguments?.getLong(getString(R.string.arg_id), 0)
+```
+
+# Intents
+
+Los intents nos sirven para mandar llamar activitys, sin embargo no solo funciona con activities que esten en nuestra aplicacion,\
+sino que tambien con aquellas de otras aplicaciones, como por ejemplo la aplicacion de contactos o llamadas, etc.\
+Una Intent es un objeto de mensajería que puedes usar para solicitar una acción de otro componente de una app
+
+Se crea un objeto Intent()\
+Se le pasa la accion a realizar, la cual se puede selecionar de la clase intent, en este caso ACTION_DIAL es para abrir la aplicacion de llamadas
+Tambien se pasa alguna informacion\
+Finalmente se inicializa la intent
+```kotlin
+val callIntent = Intent().apply {
+    action = Intent.ACTION_DIAL
+    data = Uri.parse("tel:$phone")
+}
+
+startIntent(callIntent)
+```
+
+Se utiliza una intent.resolveActivity(packageManager) para verificar que la aplicacion que se quiere abrir es compatible
+```kotlin
+private fun startIntent(intent: Intent){
+    if (intent.resolveActivity(packageManager) != null)
+        startActivity(intent)
+    else
+        Toast.makeText(this, R.string.main_error_no_resolve, Toast.LENGTH_LONG).show()
+}
+```
+
+Algunas veces se tiene errores dependiendo del API de Android que se este utilizando,\
+para el API 30 se tiene que agregar los siguiente en el manifest\
+En estas etiquetas se configuran cada uno de los intents que se quieran configurar\
+Las configuraciones de cada intent varian, buscar el especifico
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    ...
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+        </intent>
+    </queries>
+
+</manifest>
+```
+

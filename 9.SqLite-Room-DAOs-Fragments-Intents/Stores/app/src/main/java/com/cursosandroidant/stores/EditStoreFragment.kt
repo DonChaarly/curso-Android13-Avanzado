@@ -48,6 +48,12 @@ class EditStoreFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /* ===================== USO DE ARGUEMNTOS MANDADOS ==========================
+        *Para acceder a los argumentos que se hayan mandado al fragment se utiliza la variable arguments
+        * Se verifica que no sea null con ?
+        * Y se procede a utilizar el metodo correspondiente para el tipo de dato
+        * A este se le pasa la llave con la que se guardo el argumento y un valor por default
+        */
         val id = arguments?.getLong(getString(R.string.arg_id), 0)
         if (id != null && id != 0L){
             mIsEditMode = true
@@ -175,6 +181,11 @@ class EditStoreFragment : Fragment() {
 
     private fun String.editable(): Editable = Editable.Factory.getInstance().newEditable(this)
 
+    /* ============================ MANEJAR LOS ON BACK PRESSED ====================================
+    * Para esto se puede sobreescribir el metodo onAttach del ciclo de vida del Fragment y configurar un listener
+    * que este a la escucha de la seleccion del retroceso, esto se hace como sigue
+    * Dentro de la funcion HandleOnBackPressed se configura lo que se quiera hacer cuando se oprima el onBack
+    */
     override fun onAttach(context: Context) {
         super.onAttach(context)
         requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true){
@@ -183,6 +194,7 @@ class EditStoreFragment : Fragment() {
                     .setTitle(R.string.dialog_exit_title)
                     .setMessage(R.string.dialog_exit_message)
                     .setPositiveButton(R.string.dialog_exit_ok){_, _->
+                        /*Es necesario colocar el siguiente if y deshabilitar el inEnabled para no provocar un ciclo infinito al mandar llamar el onBackPressed()*/
                         if (isEnabled) {
                             isEnabled = false
                             requireActivity().onBackPressedDispatcher.onBackPressed()
