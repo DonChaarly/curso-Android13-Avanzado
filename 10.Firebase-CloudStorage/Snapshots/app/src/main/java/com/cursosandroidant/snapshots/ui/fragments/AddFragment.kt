@@ -24,30 +24,32 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-/****
- * Project: Snapshots
- * From: com.cursosandroidant.snapshots.ui.fragments
- * Created by Alain Nicolás Tello on 01/02/23 at 11:12
- * All rights reserved 2023.
- *
- * All my Udemy Courses:
- * https://www.udemy.com/user/alain-nicolas-tello/
- * And Frogames formación:
- * https://cursos.frogamesformacion.com/pages/instructor-alain-nicolas
- *
- * Coupons on my Website:
- * www.alainnicolastello.com
- ***/
 class AddFragment : Fragment() {
 
     private lateinit var mBinding: FragmentAddBinding
-    private lateinit var mSnapshotsStorageRef: StorageReference
-    private lateinit var mSnapshotsDatabaseRef: DatabaseReference
 
     private var mainAux: MainAux? = null
 
     private var mPhotoSelectedUri: Uri? = null
 
+    /*  ================================ MANEJO DE GALERIA E IMAGENES ===========================
+    * Para abrir la galeria del telefono se utiliza un Intent
+    * Se especifica la accion que se realizara, la cual sera en este caso Intent.ACTION_PICK para seleccionar una imagen
+    * y se especifica la aplicacion que se abrira la cual sera la de imagenes: MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    *  */
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        galleryResult.launch(intent)
+    }
+
+    /*Se relaciona el metodo con el boton*/
+    private fun setupButtons() {
+        with(mBinding) {
+            btnPost.setOnClickListener { if (validateFields(tilTitle)) postSnapshot() }
+            btnSelect.setOnClickListener { openGallery() }
+        }
+    }
+    /*Para obtener los resultados de la eleccion de imagen se crea un objeto registerForActivityResult*/
     private val galleryResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         if (it.resultCode == Activity.RESULT_OK) {
             mPhotoSelectedUri = it.data?.data
@@ -59,12 +61,20 @@ class AddFragment : Fragment() {
             }
         }
     }
+    /*==========================================================================================*/
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         mBinding = FragmentAddBinding.inflate(inflater, container, false)
         return mBinding.root
     }
+
+    /*====================== SUBIDA DE ARCHIVOS Y NUEVOS REGISTROS EN FIRESTORE =================
+    * Se neceistan crear variables StorageReference y DatabaseReference para hacer referencia al
+    * storage y base de datos de Firebase
+    * */
+    private lateinit var mSnapshotsStorageRef: StorageReference
+    private lateinit var mSnapshotsDatabaseRef: DatabaseReference
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -74,22 +84,18 @@ class AddFragment : Fragment() {
         setupFirebase()
     }
 
+    /*Se inicializan las variables Reference pasandole el nombre de la tabla o storage que se tiene en Firebase*/
+    private fun setupFirebase() {
+        mSnapshotsStorageRef = FirebaseStorage.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
+        mSnapshotsDatabaseRef = FirebaseDatabase.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
+    }
+
+    /*========================================================================================*/
+
     private fun setupTextField() {
         with(mBinding) {
             etTitle.addTextChangedListener { validateFields(tilTitle) }
         }
-    }
-
-    private fun setupButtons() {
-        with(mBinding) {
-            btnPost.setOnClickListener { if (validateFields(tilTitle)) postSnapshot() }
-            btnSelect.setOnClickListener { openGallery() }
-        }
-    }
-
-    private fun setupFirebase() {
-        mSnapshotsStorageRef = FirebaseStorage.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
-        mSnapshotsDatabaseRef = FirebaseDatabase.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
     }
 
     override fun onAttach(context: Context) {
@@ -97,21 +103,22 @@ class AddFragment : Fragment() {
         mainAux = activity as MainAux
     }
 
-    private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        galleryResult.launch(intent)
-    }
-
+    /*Con postSnapshot se sube una imagen a nusetro storage*/
     private fun postSnapshot() {
+        //verificamos que se ha elegido una imagen
         if (mPhotoSelectedUri != null) {
             enableUI(false)
             mBinding.progressBar.visibility = View.VISIBLE
 
+            // creamos una key a la hora de subir el archivo que sera la ruta en la que estara alojado este
             val key = mSnapshotsDatabaseRef.push().key!!
+            //Obtenemos la referencia a la carpeta de Storae del usuario logueado
             val myStorageRef = mSnapshotsStorageRef.child(SnapshotsApplication.currentUser.uid)
                     .child(key)
 
+            //Con putFile se sube la imagen
             myStorageRef.putFile(mPhotoSelectedUri!!)
+                    // Conn addOnProgressListener podemos escuchar el progreso de la subida de la imagen
                     .addOnProgressListener {
                         val progress = (100 * it.bytesTransferred / it.totalByteCount).toInt()
                         with(mBinding) {
@@ -119,24 +126,31 @@ class AddFragment : Fragment() {
                             tvMessage.text = String.format("%s%%", progress)
                         }
                     }
+                    // con addOnCompleteListener escuchamos cuando se completo la subida
                     .addOnCompleteListener {
                         mBinding.progressBar.visibility = View.INVISIBLE
                     }
+                    // Con addOnSuccessListener se confirma que se completo la subida con exito
                     .addOnSuccessListener {
                         it.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                             saveSnapshot(key, downloadUri.toString(), mBinding.etTitle.text.toString().trim())
                         }
                     }
+                    // Con addOnFailureListener se cachan los errores que se puedan tener
                     .addOnFailureListener {
                         mainAux?.showMessage(R.string.post_message_post_image_fail)
                     }
         }
     }
 
+    /*Se utiliza saveSnapshot para guardar un nuevo registro */
     private fun saveSnapshot(key: String, url: String, title: String) {
+        //Se crea un objeto de nuestra clase
         val snapshot = Snapshot(ownerUid = SnapshotsApplication.currentUser.uid,
             title = title, photoUrl = url)
+        /*Con la referencia a nuestra tabla utilizamos el metodo setValue para setear un registro*/
         mSnapshotsDatabaseRef.child(key).setValue(snapshot)
+                // con addOnSuccessListener se escucha cuando se subio el registro exitosamente
                 .addOnSuccessListener {
                     hideKeyboard()
                     mainAux?.showMessage(R.string.post_message_post_success)
@@ -149,7 +163,9 @@ class AddFragment : Fragment() {
                         imgPhoto.setImageDrawable(null)
                     }
                 }
+                // con addOnCompleteListener se escucha cuando se completo la subida del registro
                 .addOnCompleteListener { enableUI(true) }
+                // con addOnFailureListener se escucha cuando algo fallo
                 .addOnFailureListener { mainAux?.showMessage(R.string.post_message_post_snapshot_fail) }
     }
 

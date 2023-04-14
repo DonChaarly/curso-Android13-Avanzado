@@ -187,6 +187,7 @@ class HomeFragment : Fragment(), FragmentAux {
         super.onStop()
         mFirebaseAdapter.stopListening()
     }
+    /*====================================================================================*/
 
 
     private fun deleteSnapshot(snapshot: Snapshot) {

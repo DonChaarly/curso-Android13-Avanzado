@@ -16,15 +16,15 @@ Para comenzar a implementar Firebase se hace lo siguiente:
 ## Crear base de datos y tablas en Firebase
 
 Para crear tablas en Firebase se hace lo siguiente:
-1. En la seccion de Realtime Database se selecciona crear nueva base de datos:
+1. En la seccion de Realtime Database se selecciona crear nueva base de datos:\
    ![](Imagenes/CrearBaseDeDatos.png)\
-2. Se selecciona la ubicacion en la que estar la base de datos:
+2. Se selecciona la ubicacion en la que estar la base de datos:\
    ![](Imagenes/UbicacionBaseDeDatos.png)\
-3. Se seleciona el modo en el que estar, el modo de prueba dura 30 dias:
+3. Se seleciona el modo en el que estar, el modo de prueba dura 30 dias:\
    ![](Imagenes/ModoBaseDeDatos.png)\
-4. para crear una tabla se oprime el +:
+4. para crear una tabla se oprime el +:\
    ![](Imagenes/CrearTabla.png)\
-5. Para crear un registro se coloca el valor de id o key del registro y sus propiedades junto con sus valores:
+5. Para crear un registro se coloca el valor de id o key del registro y sus propiedades junto con sus valores:\
    ![](Imagenes/CrearRegistrosEnTabla.png)\
 
 ## Integrar un proyecto de Firebase a Android
@@ -207,7 +207,9 @@ class HomeFragment : Fragment(), FragmentAux {
                }
          }
 
-         /*Tambien se tiene los metodos onDataChanged y onError*/
+         /*Tambien se tiene los metodos onDataChanged y onError
+            En onDataChanged es necesario colocar el metodo notifiyDataSetChanged()
+         */
          @SuppressLint("NotifyDataSetChanged")
          override fun onDataChanged() {
                super.onDataChanged()
@@ -266,3 +268,91 @@ override fun onStop() {
    mFirebaseAdapter.stopListening()
 }
 ```
+
+## Subir imagenes y nuevos registros a Firestore
+
+Para subir archivos se utiliza Cloud Storage de Firestore
+Y para registrar los registros se seguira utilizando Database de Firestore
+
+Se comienza por delcarar los objetos StorageReference y DatabaseReference,\
+que seran nuestras referencias a la base de datos de Firestore
+```kotlin
+class AddFragment : Fragment() {
+
+   private lateinit var mSnapshotsStorageRef: StorageReference
+   private lateinit var mSnapshotsDatabaseRef: DatabaseReference
+
+   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+      super.onViewCreated(view, savedInstanceState)
+      setupFirebase()
+   }
+
+
+   private fun setupFirebase() {
+      mSnapshotsStorageRef = FirebaseStorage.getInstance().reference.child("snapshots")
+      mSnapshotsDatabaseRef = FirebaseDatabase.getInstance().reference.child("snapshots")
+   }
+}
+```
+
+Para subir una imagen se puede utilizar el siguiente codigo:
+```kotlin
+private fun postSnapshot() {
+   // creamos una key a la hora de subir el archivo que sera el nombre que se le colocara al archivo
+   val key = mSnapshotsDatabaseRef.push().key!!
+   //Obtenemos la referencia a la carpeta de Storae del usuario logueado
+   val myStorageRef = mSnapshotsStorageRef.child(SnapshotsApplication.currentUser.uid)
+            .child(key)
+
+   //Con putFile se sube la imagen
+   myStorageRef.putFile(mPhotoSelectedUri!!)
+            // Conn addOnProgressListener podemos escuchar el progreso de la subida de la imagen
+            .addOnProgressListener {
+
+            }
+            // con addOnCompleteListener escuchamos cuando se completo la subida
+            .addOnCompleteListener {
+
+            }
+            // Con addOnSuccessListener se confirma que se completo la subida con exito
+            .addOnSuccessListener {
+
+            }
+            // Con addOnFailureListener se cachan los errores que se puedan tener
+            .addOnFailureListener {
+
+            }
+
+}
+```
+Para guardar un nuevo registro en la base de datos:
+```kotlin
+private fun saveSnapshot(key: String, url: String, title: String) {
+   //Se crea un objeto de nuestra clase
+   val snapshot = Snapshot(ownerUid = SnapshotsApplication.currentUser.uid,
+      title = title, photoUrl = url)
+   /*Con la referencia a nuestra tabla utilizamos el metodo setValue para setear un registro*/
+   mSnapshotsDatabaseRef.child(key).setValue(snapshot)
+            // con addOnSuccessListener se escucha cuando se subio el registro exitosamente
+            .addOnSuccessListener {
+               
+            }
+            // con addOnCompleteListener se escucha cuando se completo la subida del registro
+            .addOnCompleteListener { 
+
+             }
+            // con addOnFailureListener se escucha cuando algo fallo
+            .addOnFailureListener { 
+
+            }
+}
+```
+
+## Autenticacion con Firebase
+
+Para la parte de autenticacion es necesario activarla en Firebase primero, para esto:
+
+1. Vamos a la parte Authentication y le damos comenzar:\
+   ![](Imagenes/FirebaseAuthenticatino.png)\
+2. Y habilitamos alguna de las opciones para poder autenticarnos:\
+   ![](Imagenes/HabilitarCorreo.png)\
