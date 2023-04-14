@@ -34,6 +34,7 @@ Este compoente es igual a un ScrollView normal pero esta optimizado para trabaja
 
 
 ## BottomAppBar
+![](/6.MaterialDesignComponents/Imagenes/BottomAppBar.png)\
 
 Es una barra de acciones en la parte inferior de la pantalla\
 Esta pensada para las aplicaciones en las que se hace un scroll y se quiere ofrecer un menu o acciones de forma accesible al usuario
@@ -43,6 +44,7 @@ Esta pensada para las aplicaciones en las que se hace un scroll y se quiere ofre
 Este es un boton flotante que se mantiene por encima de todos los demas elementos del layout
 
 ## MaterialCardView
+![](/6.MaterialDesignComponents/Imagenes/MaterialCardView.jpg)\
 
 Los MaterialCardView son otro tipo de contenedor pero especializado en mostrar informacion en areas mas pequenas a modo de tarjeta 
 
@@ -79,11 +81,12 @@ Este elementos es muy similar a un EditText, sin embargo tiene mejoras para ofre
 Este elemento es un checkBox mejorado, se utiliza para marcar opciones o desmarcarlas
 
 ## MaterialButtonToggleGroup
-
+![](/6.MaterialDesignComponents/Imagenes/MaterialButtonToggleGroup.png)\
 Este elemento se utiliza para agrupar botones como opciones
 Este elemento tomara control sobre los botones que tenga dentro
 
 ## SnackBar
+![](/6.MaterialDesignComponents/Imagenes/SnackBar.png)\
 
 El Snackbar se utiliza para mostrar un mensaje y/o ejecutar alguna accion\
 El SnackBar solo se puede crear dentro del activity con kotlin, no en el layout
@@ -130,13 +133,14 @@ El Slider es una herramienta que nos ayuda a representar rangos
 como un rango de volumen
 
 ## Chip
+![](/6.MaterialDesignComponents/Imagenes/Chip.png)\
 
 Los Chip nos sirven para representar opciones que se pueden eliminar debido a su boton x
 se utilizan para por ejemplo representar gustos
 Al hacer click sobre ellos, aparece un icono de que fue seleccionado
 
 ## MaterialAlertDialogBuilder
-
+![](/6.MaterialDesignComponents/Imagenes/MaterialAlertDialogBuilder.png)\
 Es un alerta que nos sirve para mostrar mensajes al usuario\
 Se establece desde kotlin,
 con setView se puede establecer un layout especifico que se quiera mostrar en vez del que se tiene por defecto
@@ -178,5 +182,57 @@ MaterialAlertDialogBuilder(this)
     }
     .show()
 ```
+
+## BottomNavigationView
+![](/6.MaterialDesignComponents/Imagenes/bottomNavigationBar.png)\
+Este componente se utiliza para agregar un menu de navegacion en la parte inferior,
+
+Para implementarlo:
+1. Se crea un layout menu que tendra los items:
+   ```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        <item
+            android:id="@+id/action_profile"
+            android:title="@string/home_profile"
+            android:icon="@drawable/ic_account_circle"
+            app:showAsAction="never"/>
+        ...
+    </menu>
+   ```
+2. Se coloca en la Activity_main o en el layout que se quiera colocar la etiquta del BottomNavigationView
+   ```xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        ...>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            app:menu="@menu/bottom_nav_menu"
+        ...
+        />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+   ```
+3. En el codigo de kotlin se puede acceder al botonBar de la siguente forma:
+   ```kotlin
+   mBinding.bottomNav.setOnItemSelectedListener {
+        when (it.itemId) {
+            R.id.action_home -> {
+                fragmentManager.beginTransaction().hide(mActiveFragment).show(homeFragment).commit()
+                mActiveFragment = homeFragment
+                true
+            }
+            else -> false
+        }
+    }
+
+    mBinding.bottomNav.setOnItemReselectedListener {
+        when (it.itemId) {
+            R.id.action_home -> (homeFragment as FragmentAux).refresh()
+        }
+    }
+   ```
 
 

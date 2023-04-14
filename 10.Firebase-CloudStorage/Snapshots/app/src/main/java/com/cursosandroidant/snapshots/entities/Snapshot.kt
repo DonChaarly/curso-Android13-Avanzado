@@ -3,20 +3,11 @@ package com.cursosandroidant.snapshots.entities
 import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
 
-/****
- * Project: Snapshots
- * From: com.cursosandroidant.snapshots.entities
- * Created by Alain Nicolás Tello on 01/02/23 at 11:10
- * All rights reserved 2023.
- *
- * All my Udemy Courses:
- * https://www.udemy.com/user/alain-nicolas-tello/
- * And Frogames formación:
- * https://cursos.frogamesformacion.com/pages/instructor-alain-nicolas
- *
- * Coupons on my Website:
- * www.alainnicolastello.com
- ***/
+/* ========================= DataClass para Firebase =====================================
+* Se debe comenzar por crear las clases que se estaran utilizando,
+* lo que seran basicamente nuestras tablas en Firebase
+* Se debe colocar la etiqueta @IgnoreExtraPropoerties de acuerdo a la documentacion de Firebase
+* */
 @IgnoreExtraProperties
 data class Snapshot(@get:Exclude var id: String = "",
                     var ownerUid: String = "",

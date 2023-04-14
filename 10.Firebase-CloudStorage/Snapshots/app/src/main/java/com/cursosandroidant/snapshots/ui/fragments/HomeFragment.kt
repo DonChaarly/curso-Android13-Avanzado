@@ -43,54 +43,89 @@ import com.google.firebase.storage.FirebaseStorage
 class HomeFragment : Fragment(), FragmentAux {
 
     private lateinit var mBinding: FragmentHomeBinding
-
-    private lateinit var mFirebaseAdapter: FirebaseRecyclerAdapter<Snapshot, SnapshotHolder>
-    private lateinit var mLayoutManager: RecyclerView.LayoutManager
     private lateinit var mSnapshotsRef: DatabaseReference
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         mBinding = FragmentHomeBinding.inflate(inflater, container, false)
         return mBinding.root
     }
 
+    /* ======================= Adaptador ViewHolder con Firebase ==============================
+    * Para renderizar listas de los registros por ejemplo en la vista es necesario crear una clase
+    * que extienda de ViewHolder la cual utilizaremos como adaptador,
+    * Se puede crear una inner class simplemente para esto:
+    * */
+    inner class SnapshotHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val binding = ItemSnapshotBinding.bind(view)
+
+        fun setListener(snapshot: Snapshot) {
+            with(binding) {
+                btnDelete.setOnClickListener { deleteSnapshot(snapshot) }
+
+                cbLike.setOnCheckedChangeListener { _, checked ->
+                    setLike(snapshot, checked)
+                }
+            }
+        }
+    }
+
+    /* Se crea un objeto FirebaseRecyclerAdapter al cual pasaremos nuestra entidad y nuestro ViewHolder*/
+    private lateinit var mFirebaseAdapter: FirebaseRecyclerAdapter<Snapshot, SnapshotHolder>
+    /* Se crea un objeto RecyclerView para nuestras lista de registros*/
+    private lateinit var mLayoutManager: RecyclerView.LayoutManager
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupFirebase()
         setupAdapter()
         setupRecyclerView()
     }
 
-    private fun setupFirebase() {
-        mSnapshotsRef = FirebaseDatabase.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
-    }
-
+    /*Se inicializa el adapter */
     private fun setupAdapter() {
-        val query = mSnapshotsRef
 
+        /*Se crea un objeto FirebaseDatabase con la cual obtendremos una instancia de un nodo,
+        * Se le pasa el nombre en string del nodo que tenemos en Firebase
+        * */
+        val query = FirebaseDatabase.getInstance().reference.child(SnapshotsApplication.PATH_SNAPSHOTS)
+        /*Se crea una variable FirebaseRecyclerOptions a la cual se le pasa nuestra query*/
         val options = FirebaseRecyclerOptions.Builder<Snapshot>().setQuery(query) {
+            /*Obtenemos el objeto snapshot para configurar que la variable id sera nuestra key*/
             val snapshot = it.getValue(Snapshot::class.java)
             snapshot!!.id = it.key!!
             snapshot
         }.build()
 
+        /*Se inicializa nuestro objeto FirebaseRecyclerAdapter
+        * Se le pasa nuestro entity y nuestro viewHolder con las opciones que creamos
+        * Dentro se debe sobreescribir los metodos onCreateViewHolder y onBindViewHolder
+        * */
         mFirebaseAdapter = object : FirebaseRecyclerAdapter<Snapshot, SnapshotHolder>(options) {
+            //Creamos una variable Context
             private lateinit var mContext: Context
 
+            //onCreateViewHolder se utiliza para inicializar la vista que se utilizara y el viewHolder
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SnapshotHolder {
+                //Inicializamos nuestra variable Context
                 mContext = parent.context
 
+                //Relacionamos nuestra vista la cual sera la vista de nuestro item y retornamos nuestro viewHolder
                 val view = LayoutInflater.from(mContext)
                         .inflate(R.layout.item_snapshot, parent, false)
                 return SnapshotHolder(view)
             }
 
+            /* onBindViewHolder se utiliza relacionar los datos de nuestro objeto con los elementos de la vista
+            *  y para inicializar nuestro listener de nuestro ViewHolder
+            * */
             override fun onBindViewHolder(holder: SnapshotHolder, position: Int, model: Snapshot) {
+                //Recuperamos nuestro objeto snapshot con el metodo getItem al cual le pasamos la posicion
                 val snapshot = getItem(position)
 
+                //Configuramos nuestros datos y elementos de la vista
                 with(holder) {
                     setListener(snapshot)
 
@@ -115,6 +150,7 @@ class HomeFragment : Fragment(), FragmentAux {
                 }
             }
 
+            /*Tambien se tiene los metodos onDataChanged y onError*/
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChanged() {
                 super.onDataChanged()
@@ -130,6 +166,7 @@ class HomeFragment : Fragment(), FragmentAux {
         }
     }
 
+    /*Se inicia la configuracion del RecyblesView pasandole el adaptador*/
     private fun setupRecyclerView() {
         mLayoutManager = LinearLayoutManager(context)
 
@@ -140,6 +177,7 @@ class HomeFragment : Fragment(), FragmentAux {
         }
     }
 
+    /*Se inicializa y finaliza el Listener del Adapter:*/
     override fun onStart() {
         super.onStart()
         mFirebaseAdapter.startListening()
@@ -149,6 +187,7 @@ class HomeFragment : Fragment(), FragmentAux {
         super.onStop()
         mFirebaseAdapter.stopListening()
     }
+
 
     private fun deleteSnapshot(snapshot: Snapshot) {
         context?.let {
@@ -192,17 +231,4 @@ class HomeFragment : Fragment(), FragmentAux {
         mBinding.recyclerView.smoothScrollToPosition(0)
     }
 
-    inner class SnapshotHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val binding = ItemSnapshotBinding.bind(view)
-
-        fun setListener(snapshot: Snapshot) {
-            with(binding) {
-                btnDelete.setOnClickListener { deleteSnapshot(snapshot) }
-
-                cbLike.setOnCheckedChangeListener { _, checked ->
-                    setLike(snapshot, checked)
-                }
-            }
-        }
-    }
 }
