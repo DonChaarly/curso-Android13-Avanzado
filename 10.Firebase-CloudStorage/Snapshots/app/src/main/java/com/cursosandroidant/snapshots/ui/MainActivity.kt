@@ -40,18 +40,11 @@ class MainActivity : AppCompatActivity(), MainAux {
     private lateinit var mActiveFragment: Fragment
     private var mFragmentManager: FragmentManager? = null
 
+    /* ============================= Autenticacion con Firebase =================================
+    * Se declaran dos variables FirebaseAuth
+    * */
     private lateinit var mAuthListener: FirebaseAuth.AuthStateListener
     private var mFirebaseAuth: FirebaseAuth? = null
-
-    private val authResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        if (it.resultCode == RESULT_OK) {
-            Toast.makeText(this, R.string.main_auth_welcome, Toast.LENGTH_SHORT).show()
-        } else {
-            if (IdpResponse.fromResultIntent(it.data) == null) {
-                finish()
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +54,31 @@ class MainActivity : AppCompatActivity(), MainAux {
         setupAuth()
     }
 
+    /* Se configura un objeto registerforActivityResult para saber si el usuario pudo o no inciar sesion y regreso a esta pantalla*/
+    private val authResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        if (it.resultCode == RESULT_OK) {
+            Toast.makeText(this, R.string.main_auth_welcome, Toast.LENGTH_SHORT).show()
+        } else {
+            //Aqui se verifica que se ha oprimido el boton de atras, si es el caso simplemente fializamos la actividad, para que no siga tratndo de iniciar sesion y se lance la actividad
+            if (IdpResponse.fromResultIntent(it.data) == null) {
+                finish()
+            }
+        }
+    }
+
+    // Inicializacion nuestras variables FirebaseAuth y obtenemos el usuario logueado en caso de haber y sino se lanza la activity para loguearse
     private fun setupAuth() {
+        // Inicializamos nuestra variable mFirebaseAuth
         mFirebaseAuth = FirebaseAuth.getInstance()
+        // Inicializamos nuestra variable mAuthListener indicandole lo que hara cuando trate de autenticarse el usuario al entra a la aplicacion
         mAuthListener = FirebaseAuth.AuthStateListener { it ->
+            // con it.currentUser obtenemos el usuario activo
             if (it.currentUser == null) {
+                //Si no se encuentra ningun usuario, se lanza la activity para loguearse
                 authResult.launch(
                     AuthUI.getInstance().createSignInIntentBuilder()
                         .setIsSmartLockEnabled(false)
+                            //con setAvailableProviders indicamos todos los proveedores que queremos tener, por ejemplo por correo y password y por google
                         .setAvailableProviders(
                             listOf(
                                 AuthUI.IdpConfig.EmailBuilder().build(),
@@ -77,6 +88,7 @@ class MainActivity : AppCompatActivity(), MainAux {
                 )
                 mFragmentManager = null
             } else {
+                //En caso de que se encuentre un usuario logueado, se lanza lo que se tenga que lanzar y se puede guardar en una variable global la inforamcion del usuario
                 SnapshotsApplication.currentUser = it.currentUser!!
 
                 val fragmentProfile = mFragmentManager?.findFragmentByTag(ProfileFragment::class.java.name)
@@ -91,6 +103,20 @@ class MainActivity : AppCompatActivity(), MainAux {
             }
         }
     }
+
+    // en onResume iniciamos la pedida de credenciales
+    override fun onResume() {
+        super.onResume()
+        mFirebaseAuth?.addAuthStateListener(mAuthListener)
+    }
+
+    // en onPause removemos el listener
+    override fun onPause() {
+        super.onPause()
+        mFirebaseAuth?.removeAuthStateListener(mAuthListener)
+    }
+
+    /*=======================================================================================*/
 
     private fun setupBottomNav(fragmentManager: FragmentManager) {
         mFragmentManager?.let { //clean before to prevent errors
@@ -140,16 +166,6 @@ class MainActivity : AppCompatActivity(), MainAux {
                 R.id.action_home -> (homeFragment as FragmentAux).refresh()
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mFirebaseAuth?.addAuthStateListener(mAuthListener)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mFirebaseAuth?.removeAuthStateListener(mAuthListener)
     }
 
     /*
